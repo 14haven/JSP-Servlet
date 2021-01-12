@@ -1,0 +1,393 @@
+2021년 1월 12일
+
+인자 받기 
+
+
+action
+useBean 액션태그를 이용해서 MessageDTO에 값 넣고 값 불러오기
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>form</title>
+</head>
+<body>
+	
+<!--<form name="frm" method="post" action="action.jsp">  -->
+<form name="frm" method="post" action="action.jsp">
+
+	메시지 : <input type="text" name="message" /><br>
+
+	<input type="submit" value="전송"/>
+	
+</form>
+</body>
+</html>
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import ="domain.MessageDTO" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>action</title>
+</head>
+<body>
+<%
+	// 인자 처리
+	// 인코딩 방식 지원 선처리
+	// 참고 ) EUC-KR(표준 완성형 :KSC-5691) -> MS-949(x-window-949) 호환된다
+	// MS-949가 EUC-KR 체계를 포함
+	// 참고 ) UTF-8 : http://www.unicode.org/chars/PDF/UAC00.pdf
+	// 기본 인코딩 : ISO-8859-1 (서유럽어) -> 변환 필요
+	// POST 방식 전용 인코딩 변환(적용), GET 방식과는 상관 없다.
+	// 추후에는 주로 필터(filter)로 선처리하는 경향 
+	// 참고) Tomcat 8 이후에는 get 방식 인자 한글 처리는 자동 
+	// 이전 버전은 수동 변환 처리 해야 됨.
+	// ex) String.getByte 메서드 활용, server.xml
+	// <Connectior URIEncoding="UTF-8" /> 로 처리 (서버 차원에서 처리: 모든 프로젝트에 적용됨)
+	request.setCharacterEncoding("UTF-8");
+
+
+	// POST 방식 전
+	// request : 클라이언트 요청 처리 기본(내장) 객체
+	// 원형 : HttpServletRequest
+	// 인자 수신
+	// out : 웹브라우저 출력 처리 JSP 기본(내장) 객체 
+	// 원형 : JspWriter
+	out.println("인자 : "+request.getParameter("message"));
+	
+	// 인자 수신 : DTO 단위
+	// <jsp:useBean /> 액션 태그(xml)
+	// java code 비교)
+	// domain.MessageDTO messageDTO = new domain.MessageDTO();
+	MessageDTO messageDTO2 = new MessageDTO();
+%>
+
+	<%--<jsp:useBean id="messageDTO" class="domain.MessageDTO"/> --%>
+	<jsp:useBean id="messageDTO" class="domain.MessageDTO"></jsp:useBean>
+	<!-- setter 역할 : 인자 입력 -->
+	<jsp:setProperty name="messageDTO" property="message" />
+	<%
+		messageDTO2.setMessage(request.getParameter("message"));
+	%>
+	<!-- getter 역할 : 인자 출력 -->
+	<br>
+	- message : <jsp:getProperty name="messageDTO" property="message" /> 
+	<br>
+	- message2 : <%=messageDTO2.getMessage() %>
+</body>
+</html>
+
+
+package domain;
+
+public class MessageDTO {
+
+	private String message;
+
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	
+}
+
+
+
+
+action2
+인자 2개로 늘려서 useBean 사용
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>form</title>
+</head>
+<body>
+	
+<!--<form name="frm" method="post" action="action.jsp">  -->
+<form name="frm" method="post" action="action2.jsp">
+
+	작성자 : <input type="text" name="writer" /><br>
+	메시지 : <input type="text" name="message" /><br>
+
+	<input type="submit" value="전송"/>
+	
+</form>
+</body>
+</html>
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import ="domain.MessageDTO" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>action</title>
+</head>
+<body>
+<%
+	request.setCharacterEncoding("UTF-8");
+	
+	out.println("작성자 : "+request.getParameter("writer")+"<br>");
+	out.println("메시지 : "+request.getParameter("message")+"<br>");
+
+%> 
+	<hr>
+	<jsp:useBean id="messageDTO" class="domain.MessageDTO"/>
+		
+	<%-- <jsp:setProperty name="messageDTO" property="message" />
+	<jsp:setProperty name="messageDTO" property="writer" /> --%>
+	
+	<jsp:setProperty name="messageDTO" property="*" />
+	<br>
+	- 작성자 : <jsp:getProperty name="messageDTO" property="writer" /> 
+	<br>
+	- 메시지 : <jsp:getProperty name="messageDTO" property="message" /> 
+
+</body>
+</html>
+
+
+
+package domain;
+
+public class MessageDTO {
+
+	private String message;
+	private String writer;
+
+
+	public String getWriter() {
+		return writer;
+	}
+
+	public void setWriter(String writer) {
+		this.writer = writer;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	
+}
+
+
+action3
+request.getParameterMap(); 를 사용하여 출력하기
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>form</title>
+</head>
+<body>
+	
+<!--<form name="frm" method="post" action="action.jsp">  -->
+<form name="frm" method="post" action="action3.jsp">
+
+	작성자 : <input type="text" name="writer" /><br>
+	패스워드 : <input type="password" name="password" /><br>
+	메시지 : <input type="text" name="message" /><br>
+	분류 : 스포츠 <input type="checkbox" name="kind" value="스포츠">&nbsp;
+	문화 <input type="checkbox" name="kind" value="정치">&nbsp;
+	사회 <input type="checkbox" name="kind" value="사회"><br>
+	<input type="submit" value="전송"/>
+	
+</form>
+</body>
+</html>
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import ="java.util.*, domain.MessageDTO" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>action</title>
+</head>
+<body>
+<%
+	// 인자 인코딩 처리
+	request.setCharacterEncoding("UTF-8");
+	// 인자 일괄 처리(한꺼번에) 처리
+	
+	Map<String, String[]> map
+	 = request.getParameterMap();
+	// Map => 키/값 (pair) 구조	
+	// ex) 아이디/패쓰워드 , 우편번호/기본 구조 , 전화번호(지역번호) / 지역..
+	// ※ 인자의 이름 / 값이 key 값 구조가 될 수 있다.
+	
+	
+	// 방법1
+	Set<String> set = map.keySet();
+	Iterator<String> it = set.iterator(); // 다음(next) 요소 검색 : 반복자 디자인 패턴 방식 
+	
+	while(it.hasNext()){ // 다음 요소 유무 검사 (반복문)
+		String key = it.next(); // 인자를 구하자
+		String[] value = map.get(key); // 값을 구하자
+		
+		if(value.length == 1) { // 키/값 = 1:1
+			out.println("인자 이름 : "+key+", 값 : "+value[0]);
+		}else if (value.length>1){ // 키/값 = 1:n ex) checkbox
+			for(String s : value){
+				out.println("인자 이름 : "+key+", 값 : "+s+"<br>");
+			}
+		}
+		out.println("인자 이름 : "+key+", 값 : "+value[0]+"<br>");
+	}
+	
+	// 방법2
+	// map.forEach((x,y)->System.out.println(x+"="+y[0]));
+
+
+
+	// getParameterValues 사용하기
+	 out.println("분류 : ");
+	
+	// 방법 1
+	/* String kinds[] = request.getParameterValues("kind");
+	
+	if(kinds == null){
+		out.println("<script>alert('kind인자를 체크해주세요')</script>");
+	}
+	for(String s : kinds){
+		out.print(s+"");
+	} */
+
+	// 방법 2
+	if(request.getParameterValues("kind") == null){
+		out.println("<script>alert('kind인자를 체크해주세요')</script>");
+	}else{
+		String kinds[] = request.getParameterValues("kind");
+		for(String s : kinds){
+			out.print(s+"");
+		
+	}
+	
+%> 
+	
+
+
+Map과 Set이란?
+
+package collection;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+public class CollectionTest2 {
+
+	public static void main(String[] args) {
+		
+		Map<String, String> map = new HashMap<>();
+		map.put("회", "노량진");
+		map.put("순대", "신림");
+		map.put("떡볶이", "신당");
+		map.put("떡볶이", "종로");
+		map.put("육고기", "마장");
+		map.put("부대찌개", "의정부");
+		map.put("부대찌개", "을지로");
+		map.put("족발", "장충");
+	
+		// 크기
+		System.out.println(map.size()); // 6 하나의 키값에 중복 저장 안됨
+	
+		// 낱개의 요소
+		System.out.println(map.get("떡볶이"));
+		
+		Set<String> set = map.keySet();
+
+		Iterator<String> it = set.iterator();
+		
+		while(it.hasNext()) {
+			String key = it.next();
+			String value = map.get(key);
+			System.out.println(key+" = "+value);
+		}
+		
+		map.entrySet().forEach(x->System.out.println(x));
+		map.entrySet().forEach(System.out::println);
+		map.forEach((x,y)->System.out.println(x+"="+y));
+		map.keySet().forEach(x->System.out.println(x+"="+map.get(x)));
+		
+	}
+
+}
+
+
+
+package collection;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+public class CollectionTest {
+
+	public static void main(String[] args) {
+		// 요소(element)의 중복 허용하지 않음 , index 없음
+		// Map의 Key 성분과 동일 => Map.keyset()
+		// ex) 경품 추첨, 복권...
+		String [] arr = {"정연","모모","사나","쯔위","채영","미나", "지효"};
+		Set<String> set = new HashSet<>();
+		set.add("나연");
+		set.add("나연");
+		set.add("나연");
+		set.add("다현");
+		set.add("다현");
+		set.addAll(Arrays.asList(arr));
+		System.out.println("set의 크기 : "+set.size());
+		
+		// 전체 나열
+		// 방법 1
+		Iterator<String> it = set.iterator();
+		while(it.hasNext()) {
+			System.out.println(it.next()+" ");
+		}
+		
+		// 방법 2
+		set.forEach(x->System.out.println(x));
+		
+		// 방법 3
+		set.forEach(System.out::println);
+	
+		//방법 4
+		set.stream().forEach(System.out::println);
+	}
+}
+
+
+
+
+하지만
+jsp useBean으로 aciton을 처리하는 경우는 거의 없다.
+request.getParameterMap -> DTO 화 시킨다면?, VO 화시킨다면?
+
+인자를 받을 때 조금 더 응용하는 방법
