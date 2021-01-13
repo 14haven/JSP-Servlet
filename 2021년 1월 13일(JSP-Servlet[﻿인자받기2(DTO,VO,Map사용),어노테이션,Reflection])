@@ -1,0 +1,804 @@
+2021년 1월 13일
+
+request.getParameterNames(); 를 이용해서 인자값들만 가져오기
+
+	// 인자 인코딩 처리
+	request.setCharacterEncoding("UTF-8");
+	// 인자 일괄 처리(한꺼번에) 처리
+	
+	// 반복자 (디자인) 패턴 : 다음(next) 요소 검색 방식
+	// 인덱스(index) 검색(X)
+	Enumeration<String> en = request.getParameterNames();
+	// 반환형이 Enumeration<String> 이다. 
+
+	while(en.hasMoreElements()){ // hasMoreElements = hasNext랑 같은 역할
+		String key = en.nextElement();  // nextElement = next랑 같은 역할
+		String value = request.getParameter(key);
+		
+		if(key.equals("kind")){ // 체크박스(다수의 값)
+			String[] vals = request.getParameterValues(key);
+			for (String val : vals){
+				out.println("인자명 : "+key+" = ");
+				out.println("인자값 : "+val+ "<br>");
+			}
+		}else{
+			out.println("인자명 : "+key+" = ");
+			out.println("인자값 : "+value+ "<br>");
+		}
+	}
+
+
+package test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import domain.MessageDTO;
+
+public class DtoTest {
+
+	public static void main(String[] args) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		
+		// 인자가 잘 들어가는지 테스트
+		System.out.println("DTO test");
+		
+		Map<String, String[]> map = new HashMap<>();
+		
+		String temp[] = new String[3];
+		temp[0] = "자바맨";
+		map.put("writer",temp);
+		
+		temp = new String[3];
+		temp[0] = "123456789";
+		map.put("password",temp);
+		
+		temp = new String[3];
+		temp[0] = "자바";
+		map.put("message",temp);
+		
+		temp = new String[3];
+		temp[0] = "스포츠";
+		temp[1] = "문화";
+		temp[2] = "사회";
+		map.put("kind",temp);
+		
+		temp = new String[3];
+		temp[0] = "010";
+		map.put("phone1",temp);
+		
+		temp = new String[3];
+		temp[0] = "1234";
+		map.put("phone2",temp);
+		
+		temp = new String[3];
+		temp[0] = "5678";
+		map.put("phone3",temp);
+		
+		map.forEach((x,y)-> System.out.println(x+"="+y[0]));
+	
+		MessageDTO dto = new MessageDTO(map);
+		System.out.println("dto : "+dto);
+		
+	}
+
+}
+
+
+------------------------------------------------------------------------------------------------------
+
+어노테이션 annotation 
+자바 코드 안에 들어가는 메타데이터이다.
+
+- 어노테이션의 사전적 의미는 '주석'이라는 뜻이다. 
+  프로그램에게 추가적인 정보를 제공해주는 메타데이터(설정정보 configuration)라고 볼 수 있다.
+- 컴파일러가 특정 오류를 억제하도록 지시하는 것과 같이 프로그램 코드의 일부가 아닌 프로그램에 관한 데이터를 제공한다.
+  코드에 정보를 추가하는 정형화된 방법이다.
+
+
+어노테이션의 용도
+- 컴파일러에게 코드 작성 문법 에러를 체크하도록 정보를 제공한다.
+- 소프트웨어 개발툴이 빌드나 배치 시 코드를 자동으로 생성할 수 있도록 정보를 제공한다.
+- 실행 시 특정 기능을 실행하도록 정보를 제공한다.
+- @Override 어노테이션처럼 컴파일러를 위한 정보를 제공하기 위한 용도이다.
+
+어노테이션이 나온 이유
+- 프로그램의 규모가 방대해지면서 XML이 가지는 설정 정보양이 많아졌다. 
+  XML : 전자상거래문서, front, 설정 정보 ...
+  어노테이션은 직관적인 메타데이터 설정이 가능하다. 왜냐하면 소스코드와 같이 쓰기 때문이다.
+- 시스템 전반에 영향을 주는 메타데이터는 XML로 설정하여 코드로부터 독립적으로 분리되는 것이 바람직하다.
+
+어노테이션 사용 시 장점
+- 데이터에 대한 유효성 검사 조건을 어노테이션을 사용하여 모델 클래스에 직접 명시함으로써
+  해당 데이터들에 대한 유효 조건을 쉽게 파악할 수 있게 되며 코드의 양도 줄어든다. ( 자바 코드, 간결 )
+
+
+
+메타데티터 볼 수 있는 방법 중의 하나이다.
+방법 1 : xml
+방법 2 : annotation
+방법 3 : json
+
+json이란?
+JSON (JavaScript Object Notation)
+JavaScript Object Notation라는 의미의 축약어로 데이터를 저장하거나 전송할 때 
+많이 사용되는 경량의 DATA 교환 형식 Javascript에서 객체를 만들 때 사용하는 표현식을 의미한다.
+
+JSON 표현식은 사람과 기계 모두 이해하기 쉬우며 용량이 작아서, 
+최근에는 JSON이 XML을 대체해서 데이터 전송 등에 많이 사용한다.
+JSON은 데이터 포맷일 뿐이며 어떠한 통신 방법도, 프로그래밍 문법도 아닌 단순히 데이터를 표시하는 표현 방법일 뿐이다.
+
+JSON 특징
+- 서버와 클라이언트 간의 교류에서 일반적으로 많이 사용된다.
+- 자바스크립트 객체 표기법과 아주 유사하다.
+- 자바스크립트를 이용하여 JSON 형식의 문서를 쉽게 자바스크립트 객체로 변환할 수 있는 이점이 있다.
+- JSON 문서 형식은 자바스크립트 객체의 형식을 기반으로 만들어졌다.
+- 자바스크립트의 문법과 굉장히 유사하지만 텍스트 형식일 뿐이다.
+- 다른 프로그래밍 언어를 이용해서도 쉽게 만들 수 있다.
+- 특정 언어에 종속되지 않으며, 대부분의 프로그래밍 언어에서 JSON 포맷의 데이터를 핸들링 할 수 있는 라이브러리를 제공한다.
+
+XML vs JSON
+데이터를 나타낼 수 있는 방식은 여러가지가 있지만, 대표적인 것이 XML이고, 이후 가장 많이 사용되는 것이 아마도 JSON일 것이다.
+
+XML
+- 데이터 값 양쪽으로 태그가 있다.
+(HTML을 근본으로 했기에 태그라는 것이 없을 수가 없는데, 그 태그를 줄인다 해도 최소한 표현하려면 양쪽에 몇글자씩이 있어야 한다.)
+
+JSON
+- 태그로 표현하기 보다는 중괄호({}) 같은 형식으로 하고, 값을 ','로 나열하기에 그 표현이 간단하다.
+
+
+-------------------------------------------------------------------------------------------------------------
+롬복에 있는 빌더를 써서 인자를 넘길 때
+
+DTO -> VO로 바꿔야 할때
+전화번호 3개로 입력받았는데 1개로 바꿀 때 
+
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>form</title>
+</head>
+<body>
+	
+<!--<form name="frm" method="post" action="action.jsp">  -->
+<form name="frm" method="post" action="action6.jsp">
+
+	작성자 : <input type="text" name="writer" /><br>
+	패스워드 : <input type="password" name="password" /><br>
+	메시지 : <input type="text" name="message" /><br>
+	분류 : 스포츠 <input type="checkbox" name="kind" value="스포츠">&nbsp;
+	문화 <input type="checkbox" name="kind" value="문화">&nbsp;
+	사회 <input type="checkbox" name="kind" value="사회"><br>
+	연락처 : <input type="text" name="phone1">-
+		   <input type="text" name="phone2">-
+		   <input type="text" name="phone3"><br>
+	<input type="submit" value="전송"/>
+	
+</form>
+</body>
+</html>
+
+
+package domain;
+
+public class MessageDTO {
+
+	private String message;
+	private String writer;
+	private String password;
+	private String kind[];
+	private String phone1;
+	private String phone2;
+	private String phone3;
+
+	public String[] getKind() {
+		return kind;
+	}
+
+	public void setKind(String[] kind) {
+		this.kind = kind;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getWriter() {
+		return writer;
+	}
+
+	public void setWriter(String writer) {
+		this.writer = writer;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public String getPhone1() {
+		return phone1;
+	}
+
+	public void setPhone1(String phone1) {
+		this.phone1 = phone1;
+	}
+
+	public String getPhone2() {
+		return phone2;
+	}
+
+	public void setPhone2(String phone2) {
+		this.phone2 = phone2;
+	}
+
+	public String getPhone3() {
+		return phone3;
+	}
+
+	public void setPhone3(String phone3) {
+		this.phone3 = phone3;
+	}
+	
+}
+
+
+package domain;
+
+import java.util.Arrays;
+
+public class MessageVO {
+
+	private String message;
+	private String writer;
+	private String password;
+	private String kind;
+	private String phone;
+	
+	
+	public MessageVO() {} // 생성자 오버로딩 할때 기본생성자 반드시 있어야 한다.
+	public MessageVO(String message, String writer, String password, String kind, String phone) {
+		// 생성자 오버로딩 
+		this.message = message;
+		this.writer = writer;
+		this.password = password;
+		this.kind = kind;
+		this.phone = phone;
+	}
+	 
+	// 복사 생성자
+	// DTO -> VO (형변환)
+	// front(html/jsp) -> DTO -> VO -> DAO CRUD 메서드를 통해 -> DB에 저장
+	public MessageVO(MessageDTO dto) {
+		
+		// 1:1 대응 인자들
+		this.writer =  dto.getWriter();
+		this.message = dto.getMessage();
+		this.password = dto.getPassword();
+		
+		// 다:1 대응 인자들(가공)
+		// 배열 -> 문자열
+		// ex) ["스포츠", "문화" , "사회"] (배열) = " 스포츠", "문화", "사회" (문자열로) 
+		this.kind = this.toString(dto.getKind()); 
+		
+		// 문자열들 병합해서 -> 문자열
+		// ex) 010, 1234, 5678 -> 010-1234-5678 (DB)
+		this.phone = dto.getPhone1()+"-"+
+					dto.getPhone2()+"-"+
+					dto.getPhone3();
+	}
+	
+	// 형변환은 to~로시작함
+	// 문자열 배열 => 문자열
+	// ex) ["스포츠", "문화","사회"] (배열) = " 스포츠" "문화" "사회" (문자열로) 
+	private String toString(String[] kind) {
+			
+		// 1) ["스포츠", "문화","사회"] 이런식으로 통으로 저장
+		// return Arrays.asList(kind).toString(); // kind가 List로 변환이 됨 -> toString메소드 써서 문자열로 변환
+		
+		// 2) 스포츠 문화 사회 
+		String result = "";
+		for(String s : kind) { // for each문 써서 한 문자열로 변환
+			result += s + " ";	
+		}
+		return result;
+	}
+	
+	
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	public String getWriter() {
+		return writer;
+	}
+	public void setWriter(String writer) {
+		this.writer = writer;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public String getKind() {
+		return kind;
+	}
+	public void setKind(String kind) {
+		this.kind = kind;
+	}
+	public String getPhone() {
+		return phone;
+	}
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+	@Override
+	public String toString() {
+		return String.format("MessageVO [message=%s, writer=%s, password=%s, kind=%s, phone=%s]", message, writer,
+				password, kind, phone);
+	}
+	
+	
+	
+}
+
+
+테스트
+
+package test;
+
+import java.util.Arrays;
+
+import domain.MessageVO;
+
+
+// 단위 테스트
+public class ArrayTest {
+
+	private String toString(String[] kind) {
+		
+		// 1) ["스포츠", "문화","사회"] 이런식으로 통으로 저장
+		return Arrays.asList(kind).toString(); // kind가 List로 변환이 됨
+		
+	}
+	
+	
+	public static void main(String[] args) {
+	
+		String [] arr = {"나연","다현","쯔위"};
+		
+		// 위에 적힌 메소드 사용
+		// System.out.println(new ArrayTest().toString(arr));
+		
+		
+		// MessageVO() 클래스에 있는 toString 메소드 사용
+		// 1) [나연,다현,쯔위] (DB에 저장)
+		// 2) 나연 다현 쯔위 
+		// System.out.println(new MessageVO().toString(arr));
+		
+		
+	}
+
+}
+
+----------------------------------------------------------------------------------------------------------------------
+
+
+action6
+
+action에서 request.getParameter를 일일이 쓰지 않고
+조금 간단하게 값을 DTO에 넘기는 방법은 없을까?
+=> Map을 생성해서 넘기자(request.getParameterMap)
+=> 이 Map에 대한 처리는 DTO에서 하자
+=> DTO 생성자의 매개변수로 action에서 넘겨준 Map을 받는다.
+(생성자 오버로딩 하려면 기본 생성자 명시적으로 적어줘야 한다.)
+
+
+DTO에서 인자로 Map을 받았다.
+인자명을 가진 값을 필드에 집어넣어줘야 하는데 이게 어렵다. reflection을 사용하자.
+
+reflection
+리플렉션이란 객체를 통해 클래스의 정보를 분석해 내는 프로그램 기법을 말한다.
+
+가정을 해 보자. 만약 객체의 메모리만을 알고 있고, 그리고 객체의 형에 대해서는 모른다고 생각하보자,
+리플렉션으로 형은 알고 있지만 형변환을 할 수 없는 상태에서 객체의 메서드를 호출할 수 있다.
+
+reflection 테스트 1
+​package com.javateam.jse;
+
+public class DemoVO {
+
+	private String visit1;
+
+	public String getVisit1() {
+		return visit1;
+	}
+
+	public void setVisit1(String visit1) {
+		this.visit1 = visit1;
+	}
+	
+}
+
+////////////////////////////////////////////////////
+
+package com.javateam.jse;
+ 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+ 
+public class ReflectionTest {
+ 
+    public static void main(String[] args) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+ 
+        DemoVO demoVO = new DemoVO(); // DemoVO 객체 생성
+ 
+        Class<String>[] arg = new Class[1];
+        arg[0] = String.class;
+       
+        Method method = demoVO.getClass().getDeclaredMethod("setVisit1", arg); 
+	// setVist1이라는 함수에 인자를 넣고 싶다. 어떤 인자? -> abcd1234
+        method.invoke(demoVO, "abcd1234");
+ 	// invoke: 찾아줘
+        System.out.println("visit1 : " + demoVO.getVisit1());
+ 
+    }
+ 
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+package com.javateam.jse;
+ 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+ 
+public class ReflectionTest2 {
+ 
+    public static void main(String[] args) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+ 
+        DemoVO demoVO = new DemoVO();
+ 
+        demoVO.setVisit1("abcd1234");
+        Method method = demoVO.getClass().getDeclaredMethod("getVisit1"); 
+	// getVist1이라는 함수를 가져옴 
+        System.out.println(method.invoke(demoVO));
+	// invoke : 찾아줘
+    }
+ 
+}
+
+reflection 테스트2
+
+package test;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import domain.MessageDTO;
+
+public class ReflectTest {
+
+	public static void main(String[] args) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+		
+		// reflection 테스트
+		
+		MessageDTO messageDTO = new MessageDTO();
+		
+		// 1) 필드로 접근
+		// "writer"라는 이름의 멤버 필드에 "java"라는 값을 대입
+		Field field 
+			= messageDTO.getClass().getDeclaredField("writer");
+		field.setAccessible(true); // 필드 접근 권한 획득
+		field.set(messageDTO, "java");
+		
+		//////////////////////////////////////////////
+		
+		
+		// 2) 메서드로 접근
+		// "writer"라는 이름의 멤버 필드에 해당하는 setWriter 메서드를 통해
+		// "java" 라는 값을 대입
+		Method method 
+			= messageDTO.getClass().getDeclaredMethod("setWriter", String.class);
+		method.invoke(messageDTO, "python");
+		
+		System.out.println("writer : "+messageDTO.getWriter());
+	}
+
+}
+-----------------------------------------------------------------------------------------------------
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>form</title>
+</head>
+<body>
+	
+<!--<form name="frm" method="post" action="action.jsp">  -->
+<form name="frm" method="post" action="action6.jsp">
+
+	작성자 : <input type="text" name="writer" /><br>
+	패스워드 : <input type="password" name="password" /><br>
+	메시지 : <input type="text" name="message" /><br>
+	분류 : 스포츠 <input type="checkbox" name="kind" value="스포츠">&nbsp;
+	문화 <input type="checkbox" name="kind" value="문화">&nbsp;
+	사회 <input type="checkbox" name="kind" value="사회"><br>
+	연락처 : <input type="text" name="phone1">-
+		   <input type="text" name="phone2">-
+		   <input type="text" name="phone3"><br>
+	<input type="submit" value="전송"/>
+	
+</form>
+</body>
+</html>
+
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import ="java.util.*, domain.MessageDTO, domain.MessageVO"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>action</title>
+</head>
+<body>
+<%
+	// 인자 인코딩 처리/변환
+	request.setCharacterEncoding("UTF-8");
+
+	// MessageDTO dto = new MessageDTO();
+	MessageDTO dto = new MessageDTO(request.getParameterMap());
+	// DB 저장
+	MessageVO messageVO = new MessageVO(dto);
+	// 인자 확인
+	out.println("messageVO : "+messageVO);
+	// MessageVO messageVO = new MessageVO(dto);
+	// dao.insertMessage(messageVO);
+	
+	
+	// 한줄로 쓰기
+	// dao.insertMessage(new MessageVO(new MessageDTO(request.getParaemterMap())));
+%> 
+	
+
+</body>
+</html>
+
+
+package domain;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+public class MessageDTO {
+
+	private String message;
+	private String writer;
+	private String password;
+	private String kind[];
+	private String phone1;
+	private String phone2;
+	private String phone3;
+
+	
+	public MessageDTO() {}
+	
+	// request (인자들:map) =>DTO
+	public MessageDTO(Map<String, String[]>map) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		Set<String> set = map.keySet(); // 인자명들
+		System.out.println("전송 인자명들 : ");
+		set.forEach(x->System.out.println(x));
+		System.out.println("-----------------");
+		
+		Iterator<String> it = set.iterator();
+		// 멤버 필드 검색용(reflection)
+		Field field;
+		while(it.hasNext()) {
+			String key = it.next(); // 인자명
+			// ex) 인자명(writer)
+			// this.writer = map.get(key)[0];
+			// 그러면 인자명(writer)을 가진 멤버 변수를 어떻게 검색(추출)할 수 있는가?
+			// 이때 쓰는 것이 reflection
+			// howto) relection 활용 -> ReflectionTest.java 참고
+			
+			field = this.getClass().getDeclaredField(key); // this -> 이 객체 (MessageDTO)
+			field.setAccessible(true); // 접근 허용
+			// 배열/ 낱개의 인자 구별
+			if(key.contentEquals("kind")) { // 배열(kind)
+				field.set(this, map.get(key));
+				
+			}else { // 낱개	
+				field.set(this, map.get(key)[0]); // 멤버 필드에 값을 대입
+			// this.writer = map.get(key)[0]; 과 같은 의미
+			} // if
+		} // while
+	} // 복사 생성자
+	
+	
+	public String[] getKind() {
+		return kind;
+	}
+
+	public void setKind(String[] kind) {
+		this.kind = kind;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getWriter() {
+		return writer;
+	}
+
+	public void setWriter(String writer) {
+		this.writer = writer;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public String getPhone1() {
+		return phone1;
+	}
+
+	public void setPhone1(String phone1) {
+		this.phone1 = phone1;
+	}
+
+	public String getPhone2() {
+		return phone2;
+	}
+
+	public void setPhone2(String phone2) {
+		this.phone2 = phone2;
+	}
+
+	public String getPhone3() {
+		return phone3;
+	}
+
+	public void setPhone3(String phone3) {
+		this.phone3 = phone3;
+	}
+
+	@Override
+	public String toString() {
+		return String.format(
+				"MessageDTO [message=%s, writer=%s, password=%s, kind=%s, phone1=%s, phone2=%s, phone3=%s]", message,
+				writer, password, Arrays.toString(kind), phone1, phone2, phone3);
+	}
+	
+}
+
+
+
+package domain;
+
+import java.util.Arrays;
+
+public class MessageVO {
+
+	private String message;
+	private String writer;
+	private String password;
+	private String kind;
+	private String phone;
+	
+	
+	public MessageVO() {} // 생성자 오버로딩 할때 기본생성자 반드시 있어야 한다.
+	
+	 
+	// 복사 생성자
+	// DTO -> VO (형변환)
+	// front(html/jsp) -> DTO -> VO -> DAO CRUD 메서드를 통해 -> DB에 저장
+	public MessageVO(MessageDTO dto) {
+		
+		// 1:1 대응 인자들
+		this.writer =  dto.getWriter();
+		this.message = dto.getMessage();
+		this.password = dto.getPassword();
+		
+		// 다:1 대응 인자들(가공)
+		// 배열 -> 문자열
+		// ex) ["스포츠", "문화" , "사회"] (배열) = " 스포츠", "문화", "사회" (문자열로) 
+		this.kind = this.toString(dto.getKind()); 
+		
+		// 문자열들 병합해서 -> 문자열
+		// ex) 010, 1234, 5678 -> 010-1234-5678 (DB)
+		this.phone = dto.getPhone1()+"-"+
+					dto.getPhone2()+"-"+
+					dto.getPhone3();
+	}
+	
+	// 형변환은 to~로시작함
+	// 문자열 배열 => 문자열
+	// ex) ["스포츠", "문화","사회"] (배열) = " 스포츠" "문화" "사회" (문자열로) 
+	private String toString(String[] kind) {
+			
+		// 1) ["스포츠", "문화","사회"] 이런식으로 통으로 저장
+		// return Arrays.asList(kind).toString(); // kind가 List로 변환이 됨 -> toString메소드 써서 문자열로 변환
+		
+		// 2) 스포츠 문화 사회 
+		String result = "";
+		for(String s : kind) { // for each문 써서 한 문자열로 변환
+			result += s + " ";	
+		}
+		return result;
+	}
+	
+	
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	public String getWriter() {
+		return writer;
+	}
+	public void setWriter(String writer) {
+		this.writer = writer;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public String getKind() {
+		return kind;
+	}
+	public void setKind(String kind) {
+		this.kind = kind;
+	}
+	public String getPhone() {
+		return phone;
+	}
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+	@Override
+	public String toString() {
+		return String.format("MessageVO [message=%s, writer=%s, password=%s, kind=%s, phone=%s]", message, writer,
+				password, kind, phone);
+	}
+	
+	
+	
+}
