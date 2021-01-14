@@ -1,0 +1,718 @@
+2021년 1월 14일
+
+* 어제것 복습
+인자전송 중요하다
+
+인자는 request객체가 담당한다.
+한꺼번에 가져오는것 Map
+하나만 가져오는것 Parameter
+하나인데 여러개이면 Values
+이름들만 가져오는 것 Names
+
+DTO를 VO로 만드는 것, 복사생성자
+
+------------------------------------------------------------------------------------------------------------
+
+AJAX란?
+
+웹페이지를 리로드하지않고 데이터를 불러오는방식. 
+불필요한 리소스 낭비를 줄이며 빠름. 제이쿼리안에 삽입해서 사용
+(ajax를 jquery나 javascript로 이용할 수있다. 하지만 javascript는 복잡하니 jquery로)
+
+- AJAX : https://www.w3schools.com/js/js_ajax_intro.asp
+- jQuery AJAX : https://www.w3schools.com/jquery/jquery_ajax_intro.asp
+
+
+AJAX(Asynchronous JavaScript And XML ) 비동기적인
+
+동기 : 응답이 올때까지 기다림
+비동기 : 응답이 올때까지 기다리지 않고 다른 일을 함 (인자를 받는다던지) -> 시간을 save 함
+
+
+JSP가 쓰기는 편한데 보안적으로 취약하다
+-> Servlet을 쓰자
+Servlet이 자바코드를 쓰긴하지만 보안이 안전하다 근데 그래도 조금 불편하다
+-> Strust/Spring
+
+
+event : I/O 장치에서 발생하는 현상
+처리(handler)
+
+ajax -> form과 달리 환면전환이 일어나지 않는다. (화면 전환없이 인자전송)
+form은 <input name="">  request.getParameter("name");
+ajax는 <input id="">    $("#id")
+
+
+$.ajax(
+                   {url:"demo.json",            //클라이언트가 요청을 보낼 서버의 url주소
+                        data:{"name":"이름"},   //http요청과 함께 서버로 보낼 데이터
+                        type:"post",            //http요청방식 get, post
+                        dataType:"json",        //서버에보내줄 데이터타입
+                        success:function(data, status){   //http요청이 성공하면 요청한 데이터가 전달됨
+                          <!--데이터정보(data는 변수명, status는 상태로 생략가능)-->
+                        } 
+                   }
+);
+
+
+
+doPut -> getParameter 못쓴다. IO방식으로 받아야 함
+
+submitSample
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>methodTest</title>
+<script src="http://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+ $(document).ready(function() {
+     
+     $('#get').click(function() {
+         $.ajax({
+             url : 'http://localhost:8181/submitSample/RestServlet',
+             type : 'get',
+             dataType:'text',
+             data : {
+                 id : $('#id').val(),
+                 account : $('#account').val(),
+                 price : $('#price').val(),
+                 bigo : $('#bigo').val()
+             }, // data
+             success : function(data) {
+                 //
+            } // success
+         }) // ajax
+     }) // get
+     
+     $('#post').click(function() {
+         $.ajax({
+             url : 'http://localhost:8181/submitSample/RestServlet',
+             type : 'post',
+             dataType:'text',
+             data : {
+                 id : $('#id').val(),
+                 account : $('#account').val(),
+                 price : $('#price').val(),
+                 bigo : $('#bigo').val()
+             }, // data
+             success : function(data) {
+                 //
+            } // success
+         }) // ajax
+     }) // post
+     
+     $('#put').click(function() {
+         $.ajax({
+             url : 'http://localhost:8181/submitSample/RestServlet',
+             type : 'put',
+             dataType:'text',
+             data : {
+                 id : $('#id').val(),
+                 account : $('#account').val(),
+                 price : $('#price').val(),
+                 bigo : $('#bigo').val()
+             }, // data
+             success : function(data) {
+                 //
+            } // success
+         }) // ajax
+     }) // put
+     
+     $('#delete').click(function() {
+         $.ajax({
+             url : 'http://localhost:8181/submitSample/RestServlet',
+             type : 'delete',
+             dataType:'text',
+             data : {
+                 id : $('#id').val(),
+                 account : $('#account').val() //,
+            //   price : $('#price').val(),
+            //   bigo : $('#bigo').val()
+             }, // data
+             success : function(data) {
+                 //
+            } // success
+         }) // ajax
+     }) // delete
+     
+     
+     $('#head').click(function() {
+         $.ajax({
+             url : 'http://localhost:8181/submitSample/RestServlet',
+             type : 'head',
+             dataType:'text',
+             data : {
+                 id : $('#id').val(),
+                 account : $('#account').val(),
+                 price : $('#price').val(),
+                 bigo : $('#bigo').val()
+             }, // data
+             success : function(data) {
+                 //
+            } // success
+         }) // ajax
+     }) // head
+     
+     $('#options').click(function() {
+         $.ajax({
+             url : 'http://localhost:8181/submitSample/RestServlet',
+             type : 'options',
+             dataType:'text',
+             data : {
+                 id : $('#id').val(),
+                 account : $('#account').val(),
+                 price : $('#price').val(),
+                 bigo : $('#bigo').val()
+             }, // data
+             success : function(data) {
+                 //
+            } // success
+         }) // ajax
+     }) // options
+     
+ }) //
+</script>
+</head>
+<body>
+ 
+id : <input type="text" id="id"><br>
+account : <input type="text" id="account"><br>
+price : <input type="text" id="price"><br>
+bigo : <input type="text" id="bigo"><br><br>
+ 
+<button id="get">GET</button>&nbsp;
+<button id="put">PUT</button>&nbsp;
+<button id="post">POST</button>&nbsp;
+<button id="delete">DELETE</button>&nbsp;
+<button id="head">HEAD</button>&nbsp;
+<button id="options">Options</button>&nbsp;
+<!-- <button id="trace">Trace</button>
+-->
+ </body>
+</html>
+
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+ 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+ 
+/**
+ * Servlet implementation class RestServlet
+ */
+public class RestServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+ 
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public RestServlet() {
+        // TODO Auto-generated constructor stub
+    }
+ 
+    /**
+     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+     *      response)
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        System.out.println("doGet");
+        String id = request.getParameter("id");
+        String account = request.getParameter("account");
+        System.out.println(id + " ," + account);
+    }
+ 
+    /**
+     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+     *      response)
+     */
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        System.out.println("doPost");
+        String id = request.getParameter("id");
+        String account = request.getParameter("account");
+        System.out.println(id + " ," + account);
+    }
+ 
+    /**
+     * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
+     */
+    protected void doPut(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+ 
+        String data = null;
+        String data2 = "";
+        System.out.println("doPut");
+ 
+        BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+ 
+        while ((data = br.readLine()) != null) {
+            data2 += data;
+        }
+ 
+        System.out.println(data2);
+    }
+ 
+    /**
+     * @see HttpServlet#doDelete(HttpServletRequest, HttpServletResponse)
+     */
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+ 
+        String data = null;
+        String data2 = "";
+        System.out.println("doDelete");
+ 
+        BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+ 
+        while ((data = br.readLine()) != null) {
+            data2 += data;
+        }
+ 
+        System.out.println(data2);
+    }
+   
+    /**
+     * @see HttpServlet#doHead(HttpServletRequest, HttpServletResponse)
+     */
+    protected void doHead(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+ 
+        System.out.println("doHead");
+    }
+ 
+    /**
+     * @see HttpServlet#doOptions(HttpServletRequest, HttpServletResponse)
+     */
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+ 
+        System.out.println("doOptions");
+        /*
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        response.setHeader("Access-Control-Max-Age", "86400");
+        response.setHeader("Allow", "GET, HEAD, POST, TRACE, OPTIONS");
+        */
+    }
+ 
+    /**
+     * @see HttpServlet#doTrace(HttpServletRequest, HttpServletResponse)
+     */
+    protected void doTrace(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+       
+        System.out.println("doTrace"); 
+   
+    }
+} 
+
+----------------------------------------------------------------------------------------------------------------
+
+Servlet
+JEE(Java Enterprise Edition)에 포함되어 있으며, 웹페이지를 동적으로 생성하는 서버측 프로그램 모듈. 
+쉽게 말해서 웹서버에서 구동되는 "웹용 자바 코드"라고 볼 수 있다.
+
+모든 서블릿은 javax.servlet.Servlet 인터페이스를 상속 받아 구현한다.
+서블릿을 구현 시 Servlet 인터페이스와 ServletConfig 인터페이스를 javax.servlet.GenericServlet에 구현한다.
+HTTP 프로토콜을 사용하는 서블릿은 javax.servlet.http.HttpServlet, 
+클래스는 javax.servlet.GenericServlet를 상속한 클래스로 서블릿은 httpServlet클래스를 상속받는다.
+서블릿의 Exception을 처리하기 위해서는 javax.servlet.ServletException을 상속 받아야 한다
+
+*  서블릿 동작 원리
+톰캣이 구동되면 자바가상머신(JVM)이 구동되어 자바 문법을 따르는 서블릿을 처리할 수 있는 환경이 제공된다. 
+이러한 환경을 서블릿 컨테이너라고 부른다. 서블릿의 실행은 서블릿 컨테이너에 의해 이루어진다
+
+* 서블릿 라이프 사이클
+1) 웹 브라우저(클라이언트)에서 요청(request)이 오면 웹서버가 요청을 수용한다.
+
+2) 웹서버는 web.xml 이나 애너테이션(annotation) 같은 설정 정보(configuration infomation)를 참고하여 서블릿이 존재하는지 여부를 검색(invoke)한다.
+
+3) 로딩(loading)된 설정 정보를 참고하여 기본 웹 객체의 생성자를 통해서 서블릿 인스턴스(객체)를 생성한다.
+
+4) 서블릿 내부에 서블릿 초기화에 관여하는 init() 메서드 여부를 확인하여 모코드가 오버라이딩되어 있으면 이를 우선적으로 실행한다.
+
+5) 그 이후에 각종 요청/응답 웹 관련 서비스를 담당하는 service() 메서드가 존재하는지 검색하고 존재하면 우선적으로 여기에 오버라이딩된 코드를 실행한다.
+doGet/ doPost를 바로 실행되게 하려면 Service()가 없어야 한다.
+Service에서 do계열 함수 호출할 수 있다.
+http메소드에 따라서 뭔가 선처리를 할게 있다면 Service에 적어주기
+
+6) 만약 service 메서드가 없다면 do 계열의 메서드(가령, doGet 등)를 HTTP 요청에 따른 HTTP method에 맞게 해당되는 do 계열 메서드들이 바로 실행한다. 
+즉, get 방식의 요청이 들어왔으면 doGet이 실행되고, post 방식의 요청이 들어왔으면 doPost 메서드가 실행된다. 
+do 계열의 메서드 실행시에 service 메서드 안에서 일방적으로 호출될 수도 있고 service가 불필요하여 사용하지 않게 되면 바로 do 계열의 메서드가 HTTP method(메서드)의 경우에 따라 호출된다. 
+유의할 점은 service가 존재하는 상태에서 do계열의 메서드들이 있고 service에서 특별히 do계열의 메서드를 호출하지 않는다면 do계열의 메서드가 호출되지 않는다.
+
+7) 위의 과정이 실행되면 서블릿이 소멸되는데 이때 웹서버는 destroy() 메서드가 존재하고 있다면 이를 수행한 이후 서블릿을 소멸시킨다.
+
+
+* 컨텍스트 패스, Context Path
+최상위경로
+프로젝트의 시작점
+
+
+
+*  서블릿 클래스 구성
+서블릿 클래스는 클라이언트를 통해 서비스된다는 사용되는 목적에 따라 그 형태가 정형화된
+모습을 보인다. javax.servlet.http 패키지에서 제공하는 HttpServlet클래스를 상속받아 구현해야 하며,
+브라우저를 통해 외부에서 실행되도록 하기 위해 접근 제한자를 public으로 지정해야 한다.
+
+public class [서블릿 클래스명] extends HttpServlet {
+ // 접근제한자는 반드시 public
+ // HttpServlet 클래스를 상속
+}
+
+*  GET 방식, POST 방식의 클라이언트 요청
+클라이언트는 서버에 get과 post로 불리는 두 가지 방식 중 하나로 요청을 한다.
+- GET 방식
+GET 방식은 서버에 있는 정보를 요청하여 가져오기 위해 설계되었다.
+URL에 쿼리 스트링을 추가하여 데이터를 전송하는 방식이며 형식은 다음과 같다.
+형식 : http://xxx.xxx.co.kr/servlet/login?id=tommy&name=arizona
+240바이트까지 전달할 수 있으며 QUERY.STRING 환경변수를 통해 전달된다.
+URL노출로 보안성이 요구되는 경우에는 사용하면 안되며 검색엔진에서 검색단어 전송에 많이 이용한다.
+- POST 방식
+POST 방식은 서버로 정보를 올리기 위해 설계되었다.
+html header에 포함되어 전송되며 데이터크기의 제한은 없다.
+URL에 파라미터가 표시되지 않는다.
+
+* 쿼리 스트링
+입력한 데이터를 서버로 전달하는 방식으로 ‘?’로 시작한다. 데이터는 ‘이름=값’의 형식을 취하
+며 여러 데이터들이 있을 경우 ‘&’로 구분한다.
+
+*  doGet(), doPost()
+서블릿은 클라이언트의 요청 방식에 따라 doGet( ) 혹은 doPost( ) 메소드가 호출된다
+클라이언트의 요청 방식에 맞추어 HttpServlet 클래스의 doGet( ) 혹은 doPost( ) 메소드를 오버라이딩해야 한다.
+
+
+doGet( ) 메소드
+public void doGet(HttpServletRequest req,
+HttpServletResponse resp
+) throws ServletException, IOException
+{
+ // 내용 작성 부
+}
+req는 요청을 처리하기 위한 매개변수
+resp는 응답을 처리하기 위한 매개변수
+
+
+doPost( ) 메소드
+public void doPost(HttpServletRequest req,
+HttpServletResponse resp
+) throws ServletException, IOException
+{
+// 내용 작성 부
+}
+
+req는 요청을 처리하기 위한 매개변수
+resp는 응답을 처리하기 위한 매개변수
+
+하나의 서블릿은 get과 post방식을 모두 처리할 수도 있으며 방식에 따라 다른 기능을 제공하는
+경우가 많아 doGet( ) 메소드와 doPost( ) 메소드 둘 다 오버라이딩을 하기도 한다.
+
+
+
+* 출력 스트림
+서블릿의 결과로 HTML 문서를 제공하기 위해 출력 스트림을 얻어와야 한다.
+출력 스트림을 얻어오기 전에 HTML 문서에 한글이 포함되어 있다면 한글이 깨지지 않도록 
+캐릭터 셋을 UTF-8로 지정해 주어야 한다.
+
+response.setContentType("text/html;charset=UTF-8"); // UTF-8 지정
+PrintWriter out = response.getWriter(); // 출력 스트림 객체 얻기
+
+
+
+Servlet에는 기본객체가 없다.(request, response ...) 
+직접 만들어 써야 한다.
+다만 JSP는 Servlet의 요약이기 때문에 9가지의 기본내장 객체를 갖는다.
+
+javax.servlet.http.HttpServlet
+이게 없으면 서블릿이 아니다
+
+
+
+설정 정보 -> 본 자바 코드 구성요소
+JDBC ID/PW, driver, URL -> XML, properties
+
+하나 -> 성능 !
+프로그램 모듈 분리 -> 성능 저하 개연성 !
+
+(주민등록증과 같다, 작지만 안에 모든 정보 들어있음)
+
+
+톰캣은 서블릿이나 자바코드가 바뀌면 자동으로 빌딩한다.
+
+
+
+서블릿 API
+
+HttpServletRequest (interface)
+Javax.servlet.ServletRequest 인터페이스를 상속받은 후손 인터페이스로 HTTP Servlets에 대한 
+요청정보(request information)를 처리하는 메소드를 제공한다.
+
+getParameter(String) : client가 보내준 값이 저장된 명칭이 매개변수와 같은 명칭에 저장된 값을 불러오는 메소드
+getParameterNames() : client가 보내준 값을 저장한 명칭을 불러오는 메소드 (반환형 Enumeration)
+getParameterValues(String) : client가 보내준 값이 여러개일 경우 그 값을 배열로 불러오는 메소드
+getParameterMap() : client가 보내준 값이 전체를 Map방식으로 불러오는 메소드
+setAttribute(String, object) : request 객체에 전달하고 싶은 값을 String 이름으로 Object 저장하는 메소드
+getAttribute(String) : 매개변수와 동일한 객체 속성값 불러오는 메소드
+removeAttribute(String) :  request객체에 저장되어 매개변수와 동일한 속성값 삭제하는 메소드
+setCharacterEncoding(String) : 전송받은 request 객체의 값들의 CharacterSet을 설정해주는 메소드
+getRequestDispatcher(String) : 컨테이너 내에서 request, response 객체를 전송하여 처리할
+컨포넌트(jsp 파일 등)를 불러오는 메소드로 forward()메소드와 같이 사용
+
+HttpServletResponse (interface)
+: javax.servlet.ServletResponse 인터페이스를 상속받은 후손 인터페이스로 요청에 대한
+처리결과를 요청한 클라이언트에게 응답하기 위해 사용하는 객체이다.
+
+setContentType(String) : 응답으로 작성하는 페이지의 MIME type을 정하는 메소드
+setCharacterEncoding(String) : 응답하는 데이터의 CharacterSet을 지정해주는 메소드
+getWriter() : 문자를 페이지에 전송을 하기 위한 Stream을 가져오는 메소드
+getOutputStream() : byte 단위로 페이지에 전송을 하기 위한 Stream을 가져오는 메소드
+sendRedirect(String) : client가 매개변수의 페이지를 다시 서버에 요청하게 하는 메소드
+getAttribute(String) : 매개변수와 동일한 객체 속성값 불러오는 메소드
+removeAttribute(String) : request 객체에 저장되어 있는 매개변수와 동일한 속성값 삭제하는 메소드
+getRequestDispathcer(String) : 컨테이너내에서 request, response 객체를 전송하여 처리할 컨포넌트(jsp 파일 등)을 
+불러오는 메소드로 forward() 메소드와 같이 사용
+
+
+sendRedirect VS Request.Dispatcher
+
+sendRedirect
+client의 브라우저에게 매개변수로 등록한 페이지를 재요청하라고 응답해주는 메소드이다. (301/302 코드 전송)
+encodeRedirectURL
+encodeRedirectURL은 매개변수(URL)에 세션 ID 정보를 추가 재요청 처리하는 메소드이다.
+client가 별도로 다른 페이지 요청을 안해도 url 주소(페이지)가 변경된다는 것이 특징이다.
+
+RequestDispatcher() ~ forward()
+컨테이너 내에서 처음 요청받은 페이지가 요청데이터 (HttpServletRequest, HttpServletResponse)를 
+다른 페이지에 전송하여 처리를 요청하고 자신이 처리한 것 처럼 하는 객체와 메소드이다.
+url 주소(페이지)가 변경되지 않는 것이 특징이다.
+
+
+-------------------------------------------------------------------------------------------------
+
+service(), doGet(), doPost() 메서드
+Servlet API 사용해보기
+request.setCharacterEncoding(); 
+response.setCharacterEncoding(); 
+response.setContentType("text/html; charset=UTF-8");
+PrintWriter out = response.getWriter();  // IO 패키지
+out.println("java : "+request.getParameter("java"));
+//doGet(request, response);
+
+
+servletDemo
+demo.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>form</title>
+</head>
+<body>
+	<!-- 프로젝트 시작(최상위:root) 경로(path) -->
+	context path : <%=request.getContextPath() %><br>
+	context path-2 : ${pageContext.request.contextPath} <br>
+	
+	<form method="post" action="<%=request.getContextPath()%>/DemoServlet">
+		<input type="text" name="java"/>
+	</form>
+	
+</body>
+</html>
+
+
+DemoServlet.java
+
+package servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebInitParam;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Servlet implementation class DemoServlet
+ */
+@WebServlet(
+		urlPatterns = { 
+				"/DemoServlet", 
+				"/demo.do"
+		})
+public class DemoServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public DemoServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+        System.out.println("서블릿 생성자");
+    }
+
+	/**
+	 * @see Servlet#init(ServletConfig)
+	 */
+	public void init(ServletConfig config) throws ServletException {
+		// TODO Auto-generated method stub
+		System.out.println("init");
+	}
+
+	/**
+	 * @see Servlet#destroy()
+	 */
+	public void destroy() {
+		System.out.println("destroy");
+	}
+
+	/**
+	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
+	 */
+//	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+//		
+//		System.out.println("service");
+//		doGet(request,response);
+//	}
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, 
+			HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		System.out.println("doGet");
+		// response.getWriter().append("Served at: ").append(request.getContextPath());
+		
+		// 인자 처리
+		// out객체가 없음 -> 따로 만들어줘야 한다
+		response.setContentType("text/html; charset=UTF-8");// jsp에서 contentType역할
+		PrintWriter out = response.getWriter();  // IO 패키지
+		out.println("java : "+request.getParameter("java"));
+		
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8"); 
+		// POST 방식 전용 인코딩 처리 , 반드시 적어줘야한다. => 추천) 필터(filter)화
+		response.setCharacterEncoding("UTF-8"); 
+		// response에 대해서도 인코딩 처리 , 응답에 대해서 
+		
+		response.setContentType("text/html; charset=UTF-8");// jsp에서 contentType역할
+		System.out.println("doPost");
+		PrintWriter out = response.getWriter();  // IO 패키지
+		out.println("java : "+request.getParameter("java"));
+		//doGet(request, response);
+	}
+
+}
+
+-------------------------------------------------------------------------------------------------
+
+인자전송-3, 서블릿, forward 인자 전송
+
+서블릿에서 jsp 페이지로 이동하면서 
+서블릿에서 생성한 인자를 forward를 이용하여 넘겨주기
+
+DemoServlet.java
+package servlet;
+
+import java.io.IOException;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Servlet implementation class DemoServlet
+ */
+public class DemoServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public DemoServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		System.out.println("get");
+		// response.getWriter().append("Served at: ").append(request.getContextPath());
+	
+		// 인자 생성
+		request.setAttribute("java", "1.8");
+		request.setAttribute("jsp","2.3");
+		// forward 방식으로만 인자 전송 가능 (O)
+		// 페이지(JSP) 이동, URL 불변.
+
+		// response.sendRedirect("페이지 주소(URL)");
+		// => 페이지/URL 동시 변경
+		// request.setAttribute 전송(X)
+		RequestDispatcher rd
+			= request.getRequestDispatcher("result.jsp");
+		
+		rd.forward(request, response);
+		
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		doGet(request, response);
+	}
+
+}
+
+result.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<!-- servlet => 인자 전송  -->
+
+<!-- 방법1 -->
+result1 : <%=request.getAttribute("java") %><br> 
+<!-- 방법2 -->
+result1 : ${java}<br>
+<!-- 방법3 -->
+<!-- requestScope EL(Expressional Language)의 request(요청 처리 객체)에 해당되는 기본 객체 -->
+result1 : ${requestScope.java}<br>
+
+result2 : <%=request.getAttribute("jsp") %><br>
+result2 : ${jsp}<br>
+result2 : ${requestScope.jsp}<br>
+</html>
