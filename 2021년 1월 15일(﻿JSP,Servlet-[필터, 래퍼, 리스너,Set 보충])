@@ -1,0 +1,613 @@
+2021년 1월 15일
+
+어제 것 복기
+- jsp로 action 쓰면 안전하지 않다. -> servlet으로 -> 하지만 복잡하다. (스프링을 통해 servlet을 편하게 쓸 수 있다.)
+- 서블릿의 라이플 사이클 ( init(), service(), doGet(), doPost(), destroy() )
+- 인자 보내는 것, 인자 받는 것 잘 알아야 한다. 인자이름, 오타, 띄어쓰기 주의 해야 함
+- setCharacterEncoding : Post 방식으로 받은 인자 인코딩 꼭 써줘야 한다.
+- getRequestDeispatche(String) + forward : URL 주소 그대로, 내용만 바꾸니다.
+- response.sendRedirect() : URL 바뀜 = window.location.href= " " (javascript)
+
+--------------------------------------------------------------------------------------------------------
+
+LISTENER, FILTER, WRAPPER
+
+서블릿 필터와 래퍼
+서블릿은 웹에서 실행되는 프로그램이기 때문에 네트워크 통신의 사이 사이에서 특별한 동작을 만들어 낼 수 있다.
+예를 들면, 데이터를 입력한 후 실제 저장하는 페이지로 넘어가기 전에 넘겨지는 데이터들에 대하여 charset을 UTF-8로 변경하는 작업이 가능하다. 
+또한, 세션이 만들어지거나 삭제될 때 이것을 감지하는 작업도 할 수 있다. 
+이렇게 여러가지 동작에 있어서 사이 사이에 끼워져서 실행되는 서블릿의 클래스를 필터라 부르고 
+동작이 발생할 때 감지하는 것을 이벤트(IO이벤트)라 부른다.
+
+서블릿 필터와 래퍼 클래스를 이용해 다음과 같은 로직 구현 가능
+1. 서비스 별 로그 기록
+2. 이미지 변환 필터
+3. 문자셋 변환 필터
+  : post와 get방식 확인한 후에 post는 setCharacterEncoding 해야 하지만, get은 안했다.
+하지만 이제 필터를 거치기 때문에 처음부터 인코딩을 해서 보내기 때문에 서블릿에서 post에서 get인지 확인 안하도록 일을 줄인다.
+4. 비밀번호 암호화 로직 구현
+5. 사용자 인증 로직 구현
+
+
+
+서블릿 필터
+서블릿 필터란 말 그대로 여과기능을 수행하는 클래스를 말한다.
+일반적으로 웹 프로그램이 메인 화면에서 여러 서비스를 연결하는데, 반드시 로그인이 필요하다고 한다면 
+각각의 페이지에 로그인 여부를 확인하는 코드를 일일히 넣어 주어야 한다. 
+하지만 필터 클래스를 사용하면, 메인 페이지에서 서비스 페이지로 넘어 가기 이전에 
+로그인 여부를 체크할수 있어 코드의 중복이나 복잡성을 해소할 수 있다.
+이러한 필터를 사용하려먼 먼저 필터 클래스를 작성해야 하는데, 필터 클래스의 기본적인 구조는 다음과 같다.
+(인코딩 선처리, 일일이 쓰지 않아도 됨, 로그인 인증)
+
+public class MyFilter implements Filter {
+    // 필터를 사용하려면 javax.servlet.Filter 인터페이스를 상속 받아 구현해야 한다.
+    @Override
+    public void init(FilterConfig arg0) throws ServletException {
+    // 필터의 초기화 작업
+ }
+ @Override
+ public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+ throws IOException, ServletException {
+    // 필터가 수행될 때 해당 메소드를 실행한다.
+    // 매개 변수인 FilterChain은 다음에 존재하는 필터로 이동 시키는 역할을 한다.
+    // 1. Request 파라미터를 이용하여 요청의 필터 작업 수행
+
+   // 2. 체인의 다음 필터 처리
+    chain.doFilter(request, response);
+    /*
+    * 3. response 를 이용하여 응답의 필터링 작업 수행 
+    * 필터 메서드 내용부의 마지막 코드는 현재까지 작업한 내용을 적용하고 연결된 페이지로 이동하도록 만들어 준다.
+    * 이런 역할을 하는 메서드가 chain 객체의 doFilter()이다.
+    * 세번째 매개변수인 FilterChain 클래스의 객체인 chain 을 이용해서
+    * 다른 필터나 서블릿과 연결하는 코드를 반드시 작성해야 한다
+    */
+ }
+ @Override
+ public void destroy() {
+    // 4. 필터가 없어질 때 호출된다
+}
+}
+
+필터 클래스의 작성이 완료 되었다면 이를 web.xml 에 등록하여 웹 서버에서 필터를 초기화하고,
+작업할 수 있게 해주어야 한다.
+web.xml에 필터 클래스를 등록하는 작업은 다음과 같이 수행한다
+
+<filter> <!-- 웹 어플리케이션에서 사용될 필터를 지정하는 역할 -->
+    <filter-name> 필터 명 </filter-name>
+    <filter-class> 필터 클래스 </filter-class>
+    <init-param> <!—가지고 시작할 파라미터 선언 -->
+      <param-name> 파라미터 명 </param-name>
+      <param-value>value</param-value>
+      <!—param-name 은 param의 Key 역할, param-value 는 value 역할 -->
+    </init-param>
+ </filter>
+ <filter-mapping> <!-- 특정 자원에 대해 어떤 필터를 사용할지를 지정 -->
+     <filter-name> 필터 명 </filter-name>
+     <url-pattern> *.jsp </url-pattern> <!-- 특정 url 패턴 -->
+     <!-- <servlet-name>servlet 명</servlet-name> -->
+     <dispatcher>INCLUDE</dispatcher>
+ </filter-mapping>
+
+- param-name/value : 필터가 초기화될 때, 즉 필터의 init() 메소드가 호출될 때 전달되는 파라미터 값,
+ 이는 서블릿의 초기화 파라미터와 비슷한 역할을 하며 주로 필터를 사용하기 전에 초기화해야 하는 
+ 객체나 자원을 할당할 때 필요한 정보를 제공하기 위해 사용된다.
+- url-pattern : 클라이언트가 jsp 확장자를 갖는 자원을 요청할 경우 FilterName이 사용되도록 지정한다.
+- servlet-name : 클라이언트가 요청한 특정 URI 에 대해서 필터링을 할 때 사용한다
+- dispatcher : 실행되는 자원을 클라이언트가 요청한 것인지, 아니면 RequestDispather 의 forward()를 통해서
+이동한 것인지 아니면 include() 통해서 포함되는 것인지에 따라서 필터를 적용하도록 지정할 수 있다.
+
+dispatcher의 값 분류
+REQUEST :  클라이언트의 요청인 경우 필터 적용(기본값)
+INCLUDE : Include()를 통해서 포함하는 경우 필터를 적용
+FORWARD : RequestDispatcher의 forward()를 통해서 제어를 이동하는 경우 필터를 적용
+ERROR : error 핸들러를 호출했을 경우 필터를 적용
+
+
+필터 예시)
+form.jsp에서 인자 전송하기
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>form</title>
+</head>
+<body>
+	<form action="${pageContext.request.contextPath}/demo.do" method="post">
+		
+		java : <input type="text" name="java">
+			
+	</form>
+</body>
+</html>
+
+DemoServlet.java에서 인자 받음  하지만 중간에 필터가 있다.
+package servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebInitParam;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Servlet implementation class DemoServlet
+ */
+//@WebServlet(
+//		description = "데모 서블릿", 
+//		urlPatterns = { 
+//				"/DemoServlet", 
+//				"/demo.do"
+//		}, 
+//		initParams = { 
+//				@WebInitParam(name = "java", value = "1.8", description = "jdk version"), 
+//				@WebInitParam(name = "jsp", value = "2.3", description = "jsp version")
+//		})
+public class DemoServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public DemoServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+        System.out.println("서블릿 생성자");
+    }
+
+	/**
+	 * @see Servlet#init(ServletConfig)
+	 */
+	public void init(ServletConfig config) throws ServletException {
+		System.out.println("init");
+	}
+
+	/**
+	 * @see Servlet#destroy()
+	 */
+	public void destroy() {
+		System.out.println("destroy");
+	}
+
+	/**
+	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
+	 */
+//	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+//
+//		System.out.println("service");
+//		doGet(request, response);
+//	}
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, 
+				HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		System.out.println("doGet");
+		// response.getWriter().append("Served at: ").append(request.getContextPath());
+		// 인자 처리
+		
+		response.setContentType("text/html; charset=UTF-8");
+		PrintWriter out = response.getWriter();
+		out.println("java : " + request.getParameter("java"));
+		
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		System.out.println("doPost");
+
+		// request.setCharacterEncoding("UTF-8");  필터에 작성해놨음
+		// POST 방식 전용 인코딩 처리 => 추천) 필터(filter)화
+		response.setCharacterEncoding("UTF-8");
+		
+		response.setContentType("text/html; charset=UTF-8");
+		PrintWriter out = response.getWriter();
+		out.println("java : " + request.getParameter("java"));
+	}
+
+}
+
+
+DemoFilter.java
+package filter;
+
+import java.io.IOException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
+/**
+ * Servlet Filter implementation class DemoFilter
+ */
+public class DemoFilter implements Filter {
+
+    /**
+     * Default constructor. 
+     */
+    public DemoFilter() {
+        // TODO Auto-generated constructor stub
+    	System.out.println("필터 생성자");
+    }
+
+	/**
+	 * @see Filter#destroy()
+	 */
+	public void destroy() {
+		// TODO Auto-generated method stub
+		System.out.println("filter destroy");
+	}
+
+	/**
+	 * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
+	 */
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		// TODO Auto-generated method stub
+		// place your code here
+		System.out.println("doFilter");
+		System.out.println("chain 이전");
+		
+		request.setCharacterEncoding("UTF-8");
+		
+		
+		// pass the request along the filter chain
+		chain.doFilter(request, response);
+		
+		System.out.println("chain 이후");
+	}
+
+	/**
+	 * @see Filter#init(FilterConfig)
+	 */
+	public void init(FilterConfig fConfig) throws ServletException {
+		// TODO Auto-generated method stub
+		System.out.println("필터 init");
+	}
+
+}
+
+
+
+인증 필터 예시
+package com.javateam.member.util;
+ 
+import java.io.IOException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+ 
+import com.javateam.member.dao.MemberDAO;
+import com.javateam.member.dao.MemberDAOImpl;
+ 
+/**
+ * Servlet Filter implementation class AuthFilter
+ */
+@WebFilter("/member/viewAll.do")
+public class AuthFilter implements Filter {
+ 
+    /**
+     * Default constructor.
+     */
+    public AuthFilter() {
+        // TODO Auto-generated constructor stub
+    }
+ 
+    /**
+     * @see Filter#destroy()
+     */
+    public void destroy() {
+        // TODO Auto-generated method stub
+    }
+ 
+    /**
+     * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
+     */
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+ 
+        HttpServletRequest req = (HttpServletRequest)request;  
+	// 필터는 클라이언트와 서블릿 사이에 끼어있다.
+	// 형변환을 해줘야 함 (상위로) 
+        HttpServletResponse res = (HttpServletResponse)response;
+       
+        HttpSession session = req.getSession();
+	// 세션 만들기 
+        
+        String contextPath = req.getContextPath();
+	// 최상위 경로(ContextPath) 얻어내기
+        boolean adminYn = false;
+       
+        if (session.getAttribute("LOGIN_SESSION")==null) { 
+	// 서블릿에서 할 수 있는건데 필터에서 해주는 것 
+           
+            System.out.println("로그인 미인증");
+           
+            request.setAttribute("msg","로그인 미인증");
+            request.setAttribute("move_page", "/template.do?=/member/login.jsp");
+           
+            // template 적용시
+            RequestDispatcher rd = req.getRequestDispatcher("/template.do?content_page=/error/result.jsp");
+            rd.forward(req, res);  
+            return;
+           
+        } else {
+           
+            // role 점검 (역할)
+            MemberDAO dao = MemberDAOImpl.getInstance();
+            String memberId = (String)session.getAttribute("LOGIN_SESSION");
+            String role = "";
+           
+            try {
+                role = dao.getRoleByMemberId(memberId); // 사용자 롤(role)정보 확보
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+           
+            if (role.contentEquals("admin")) { // admin 권한 점검
+               
+                adminYn = true;
+                // res.sendRedirect(contextPath+"/member/viewAll.do");
+                // java.lang.IllegalStateException : 응답이 이미 커밋된 후에는, sendRedirect()를 호출할 수 없습니다. 에러 패치
+                // return;
+               
+            } else {
+               
+                System.out.println("권한 없음");
+               
+                request.setAttribute("msg","권한 없음");
+                request.setAttribute("move_page", "/index.do");
+               
+                // template 적용시
+                RequestDispatcher rd = req.getRequestDispatcher("/template.do?content_page=/error/result.jsp");
+                rd.forward(req, res);  
+                return;
+            } //
+           
+            chain.doFilter(request, response);
+            // 경우에 따라 위의 구문이 없으면 "페이지가 작동하지 않습니다. localhost에서 리디렉션한 횟수가 너무 많습니다." 에러 유발됨.
+           
+            if (adminYn==true) {
+               
+                // java.lang.IllegalStateException : 응답이 이미 커밋된 후에는, sendRedirect()를 호출할 수 없습니다. 에러 패치
+                try {
+                    res.sendRedirect(contextPath+"/member/viewAll.do");
+                } catch (IllegalStateException e) {
+                    return;
+                }
+               
+            } else {
+               
+                try {
+                    res.sendRedirect(contextPath+"/member/login.do");
+                } catch (IllegalStateException e) {
+                    return;
+                }
+            } //
+                       
+        } //
+    }
+ 
+    /**
+     * @see Filter#init(FilterConfig)
+     */
+    public void init(FilterConfig fConfig) throws ServletException {
+        // TODO Auto-generated method stub
+    }
+ 
+}
+
+
+
+서블릿 래퍼 (보조하는 클래스이다)
+
+필터 클래스로부터 전달받은 데이터를 가공하여 다시 필터에게 반환하는 클래스
+데이터 가공이 필요한 시점이 요청일 경우 HttpServletRequestWrapper 클래스를 통해 구현하고
+응답일 경우 HttpServletResponseWrapper클래스를 통해 구현
+
+필터는 클라이언트에게서 받은 request와 내보낼 response에 대해서 UTF-8로 인코딩을 변경하는 작업은 있었지만, 
+실제 데이터를 가공하지는 못했다. 단순히 response로 받은 데이터를 전달만 했다는 뜻이다.
+즉 서블릿 필터는 사용자의 요청을 대신 받을 수 있으나, 이에 대한 데이터 가공은 하지 못한다.
+그렇기 때문에 만약 필터로 전달받은 데이터의 변경이 필요하다면 ServletRequestWrapper와
+ServletResponseWrapper 클래스를 사용하여 데이터를 변경하는 작업을 해 주어야 한다.
+HttpServletRequestWrapper 클래스와 HttpServletResponseWrapper 클래스는 모두 javax.servlet.http
+패키지에 정의되어 있으며, 이 두 클래스는 각각 HttpServletRequest 인터페이스와
+HttpServletResponse 인터페이스에 정의되어 있는 모든 메소드가 구현되어 있다. 
+따라서 필터를 통해 변경하고 싶은 정보가 있을 경우 그 정보를 추출하는 메소드를 쓰임에 맞게 오버라이딩하여
+필터의 doFilter() 메소드에 넘겨주기만 하면 된다.
+
+- ServletRequestWrapper 기본 구조
+public class ParameterWrapper extends HttpServletRequestWrapper {
+  
+  public ParameterWrapper(HttpServletRequest request) {
+     super(request);
+     // 생성자는 전달받은 request 객체를 사용하여 만든다.
+}
+
+    public String getParameter(String name) {
+     // …. 원하는 작업 수행 ….
+       return super.getParameter(name);
+     }
+   }
+}
+
+- ServletResponseWrapper 기본 구조
+public class ResWrapper extends HttpServletResponseWrapper {
+       private HttpServletResponse response;
+       public ResWrapper(HttpServletResponse response) {
+          super(response);
+          this.response = response;
+       }
+}
+
+- 래퍼를 사용한 필터 클래스의 구조
+public class MyFilter implements Filter {
+       ...
+   
+   public void dofilter(ServletRequest request, ServletResponse response, FilterChain chain)... {
+   // 기존의 request 혹은 response로 Wrapper 를 생성하고, doFilter 메소드에 사용하면 된다.
+     MyRequestWrapper requestWrapper =
+        new MyRequestWrapper((HttpServletRequest) request);
+     chain.doFilter(requestWrapper, response);
+   }
+}
+
+
+
+서블릿 이벤트
+서블릿은 다양한 시점에 발생되는 이벤트와 이벤트를 처리하기 위한 인터페이스를 정의하고 있다. 
+이들 이벤트와 인터페이스를 이용하면 
+웹 어플리케이션에서 필요로 하는 데이터의 초기화나 요청 처리 등을 추적할 수 있으며, 
+데이터 저장 영역(application, session, request)에 데이터가 들어가고 나가는 
+혹은 그 객체가 생성되고 소멸되는 일련의 작업들에 대해 컨트롤할 수 있다.
+
+- 이벤트가 사용되는 경우 –
+1. 컨텍스트가 초기화되는 경우
+2. 세션이 생기거나 소멸되는 경우
+3. 속성이 바뀌는 경우
+
+이런 이벤트에 대해서 미리 web.xml 파일에 등록해두면 웹 서버는 초기 구동 시에 
+해당 이벤트를 대기 상태로 두었다 이벤트 발생 시 자동으로 이벤트를 감지(listen)하고 
+우리가 지정한 클래스 내의메서드를 실행해준다. 
+때문에 서블릿에서 이벤트 클래스를 실행되게 하려면 무엇보다 web.xml 파일의 설정이 중요하다. 
+이러한 이벤트는 외부의 변화보다는 내부의 변화를 처리하는 경우가 많다. 
+
+
+- web.xml에 이벤트 리스너 추가하기
+<listener>태그는 WAS가 시작되거나 종료될 때 실행되어야 하므로, 
+web.xml 파일의 최상위에 작성해야 한다
+
+<web-app>
+<listener>
+	<display-name>이벤트 리스너 명</display-name>
+	<listener-class>리스너 클래스</listener-class>
+</listener>
+.....
+</web-app>
+
+
+제어할 수 있는 이벤트 리스너의 종류
+이벤트는 발생 시점에 따라 종류가 나뉘는데, 세부사항은 다음과 같다.
+
+1. 이벤트 리스너 : ServletContextListener
+발생시점 : 웹 어플리케이션의 시작과 종료시 자동으로 발생
+메소드 종류
+contextInitialized(ServletContextEvent sce) : void
+웹 컨테이너가 처음 구동될 때 실행되는 메소드
+contextDestoryed(ServletContextEvent sce) : void
+웹 컨테이너가 종료될 때 실행되는 메소드
+
+2. 이벤트 리스너 : ServletContextAttributeListener
+발생시점 : ServletContext 객체에 속성이 추가, 삭제, 수정될 때 발생
+메소드 종류
+attributeAdded(ServletContextAttributeEvent scae) : void
+새로운 속성 값이 추가될 때 실행되는 메소드
+attributeRemoved(ServletContextAttributeEvent scae) : void
+속성 값이 제거될 때 실행되는 메소드
+attributeReplaced(ServletContextAttributeEvent scae) : void
+속성 값이 변경될 때 실행되는 메소드
+
+3. 이벤트 리스너 : HttpSessionListener
+발생시점 : HttpSession 객체가 생성되거나 소멸될 때 발생
+메소드 종류
+sessionCreated(HttpSession se) : void
+세션이 생성되었을 경우 실행되는 메소드
+sessionDestoryed(HttpSession se) : void
+세션이 무효화 되었을 경우 실행되는 메소드
+
+4. 이벤트 리스너 : HttpSessionAttributeListener
+발생시점 : HttpSession 객체에 속성이 추가, 삭제, 수정될 때 발생
+메소드 종류
+attributeAdded(HttpSessionBindingEvent e) : void
+세션에 새로운 속성 값이 추가될 때 실행되는 메소드
+attributeRemoved(HttpSessionBindingEvent e) : void
+세션의 속성 값이 제거될 때 실행되는 메소드
+attributeReplaced(HttpSessionBindingEvent e) : void
+세션의 속성 값이 변경될 때 실행되는 메소드
+
+web.xml에 한 개이상의 리스너가 등록되어 있는 경우,
+contextInitialized() 메서드는 등록된 순서대로 실행되고 contextDestoryed() 메서드는 등록된 반대 순서대로 실행된다.
+
+
+서블릿 이벤트 리스너 예)
+package first.member.listener;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+public class SessionListener implements HttpSessionListener, HttpSessionAttributeListener {
+/* …. 구현해야할 메소드 중 사용하는 부분만 표현하였음 …..*/
+ @Override
+ public void attributeAdded(HttpSessionBindingEvent e) {
+ String name = (String)e.getSession().getAttribute("name");
+ System.out.println(name+" 님이 접속하셨습니다.");
+ }
+ @Override
+ public void sessionCreated(HttpSessionEvent e) {
+ System.out.println(e.getSession().getId()+"세션이 생성되었습니다.");
+ }
+ @Override
+ public void sessionDestroyed(HttpSessionEvent e) {
+ System.out.println(e.getSession().getId()+"세션이 파괴되었습니다.");
+ }
+}
+
+
+SessionListener를 만들었다면, 이제 web.xml에 이벤트를 등록하여야 한다
+
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<listener>
+<listener-class> first.member.listener.SessionListener </listener-class>
+</listener>
+<display-name>myWeb</display-name>
+<welcome-file-list>
+ <welcome-file>index.html</welcome-file>
+</welcome-file-list>
+</web-app>
+
+
+
+default
+1) switch에서 default
+2) 접근제한자 default
+3) 디폴트 메소드
+- 기존 인터페이스를 확장해서 새로운 기능을 추가하기 위해서 허용됨
+- 인터페이스에 선언되지만 실제로는 객체가 가지고 있는 인스턴스 메소드가 됨
+- 실제로는 해당 인터페이스를 포함한 클래스의 멤버 메소드가 됨
+- 인터페이스가 변경이 되면, 인터페이스를 구현하는 모든 클래스들이 해당 메소드를 구현해야 하는 문제가 있다. 
+이런 문제를 해결하기 위하여 인터페이스에 메소드를 구현해 놓을 수 있도록 하였다.
+오버라이딩 해도 되고 안해도 되고
+- 사용법 : default 반환자료형 메소드명(매개변수);
+default void defaultMethod(){
+System.out.println("인터페이스01의 디폴트 메소드");
+}
+
+public class DemoInterfaceImpl implesments DemoInterface{
+
+	@Override
+	public ....{
+		DemoInterface.super.defaultMethod();
+	}
+}
+
